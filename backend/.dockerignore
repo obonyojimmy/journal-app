@@ -1,0 +1,10 @@
+.env
+.env.db
+docker-compose.yml
+docker-compose.dev.yml
+.pip
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.zip

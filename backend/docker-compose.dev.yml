@@ -1,0 +1,44 @@
+## Notes
+##  - this compose file uses host network, coz my docker setup has network nameserver issues with ISP am using. 
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      network: host
+    volumes:
+      - ./src:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    network_mode: host
+    #networks:
+    #  - db
+    #ports:
+    #  - "5000:5000"
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+    network_mode: host
+    #networks:
+    #  - db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  db: {}
+
+volumes:
+  postgres:
+  pgadmin:

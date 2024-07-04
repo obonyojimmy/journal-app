@@ -1,0 +1,11 @@
+fastapi
+pydantic
+pydantic_settings
+email-validator
+python-multipart
+SQLAlchemy
+psycopg2-binary
+uvicorn
+gunicorn
+alembic
+pytest
