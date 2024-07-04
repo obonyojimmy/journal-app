@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
-from .auth_router import router as auth_router
+from .routes.auth_router import router as auth_router
 
 app = FastAPI(
 	title='Journal api',

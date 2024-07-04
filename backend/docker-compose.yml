@@ -1,5 +1,3 @@
-version: "3.9"
-
 ## Notes
 ##  - restart-policy : https://docs.docker.com/config/containers/start-containers-automatically/
 
@@ -9,9 +7,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:5000"
+      - "5000:5000"
     volumes:
-      - ./src:/app
+      - ./:/app
     env_file:
       - .env
     depends_on:
@@ -24,6 +22,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      POSTGRES_DB: journal_api
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres

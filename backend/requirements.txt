@@ -5,6 +5,8 @@ email-validator
 python-multipart
 SQLAlchemy
 psycopg2-binary
+passlib[bcrypt]
+pyjwt
 uvicorn
 gunicorn
 alembic

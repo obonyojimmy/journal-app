@@ -1,4 +1,4 @@
-"""user-workspace table
+"""user-journal table
 
 Revision ID: db1b25773970
 Revises: 
@@ -26,7 +26,8 @@ def upgrade():
         "user",
         sa.Column("id", UUID(as_uuid=True), primary_key=True, unique=True, nullable=False), # *(required) , cognito user-id
         sa.Column("email", sa.String(), unique=True, nullable=False), # *(required)
-        sa.Column("username", sa.String(), unique=True, nullable=False), # *(required)
+        sa.Column("hash_password", sa.String(), unique=True, nullable=False), # *(required)
+        sa.Column("profile", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
     )
@@ -37,7 +38,7 @@ def upgrade():
         sa.Column("title", sa.String(), nullable=False), # *(required)
         sa.Column("user_id", UUID(as_uuid=True), nullable=False, comment="user_id (creator) of this journal"), # *(required)
         sa.Column("content", sa.String(), nullable=True),
-        sa.Column("categories", sa.ARRAY(sa.String()), nullable=True),
+        sa.Column("categories", sa.JSON, nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=func.now()),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
     )

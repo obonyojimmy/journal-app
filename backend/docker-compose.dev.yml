@@ -8,9 +8,11 @@ services:
       dockerfile: Dockerfile
       network: host
     volumes:
-      - ./src:/app
+      - ./src:/app/src
     env_file:
       - .env
+    environment:
+      POSTGRES_URL: postgresql://postgres:admin@localhost:5432/journal_api
     depends_on:
       - db
     network_mode: host
@@ -24,6 +26,7 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      POSTGRES_DB: journal_api
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
