@@ -4,15 +4,23 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import List, Optional, Union, Any
 from uuid import UUID
 from src.config import config
-from src.schema import Token
+from src.schema import Token, User
 from src.crud import CrudUser
 from src.utils import create_token
 
 router = APIRouter()
 
-
+@router.post("/register")
+async def register(
+    email: str = Form(..., description="registration email"),
+	password: Optional[str] = Form(..., description="registration password"),
+) -> User:
+    crud_user = CrudUser()
+    user = crud_user.register(email, password)
+    return user
+    
 @router.post("/token")
-async def login_for_access_token(
+async def token_login(
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Token:
     crud_user = CrudUser()

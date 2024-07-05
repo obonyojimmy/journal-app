@@ -1,8 +1,9 @@
 from typing import Type, TypeVar, Optional, Any, Generic, List, Union, Dict
 from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from .models import Base, User
-from .utils import DatabaseSession, verify_password
+from .utils import DatabaseSession, verify_password, hash_pass
 
 ModelType = TypeVar("ModelType", bound=Base)
 
@@ -55,13 +56,38 @@ class CrudUser(CRUDBase):
 	def get(self, id: str, refresh:bool=False) -> User:
 		return super().get(id, refresh=refresh)
 	
+	def filter(self, email: str, limit: int = 0) -> Union[User, List[User]]:
+		db = self.db
+		model: User = self.model
+		query = db.query(model)
+		query = query.filter(model.email == email)
+		if limit == 1:
+			return query.first()
+		if limit:
+			return query.limit(limit).all()
+		return query.all()
+	
 	def create(self, obj: dict) -> User:
 		return super().create(obj)
 	
 	def authenticate(self, email: str, password: str):
-		user = self.get(email)
+		user = self.filter(email, limit=1)
 		if not user:
 			return False
 		if not verify_password(password, user.hash_password):
 			return False
+		return user
+	
+	def register(self, email: str, password:str):
+		user = self.filter(email, limit=1)
+		if user:
+			raise HTTPException(
+				status_code=status.HTTP_406_NOT_ACCEPTABLE,
+				detail="User already exists",
+			)
+		hashed_pass = hash_pass(password)
+		user = User(email=email, hash_password=hashed_pass)
+		self.db.add(user)
+		self.db.commit()
+		self.db.refresh(user)
 		return user
