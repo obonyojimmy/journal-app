@@ -17,7 +17,6 @@ export default function Signin() {
             Alert.alert('Error', error.message);
         }
     };
-    const { signIn } = useSession();
 
     return (
         <View className="flex flex-1">
