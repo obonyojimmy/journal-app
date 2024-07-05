@@ -13,7 +13,8 @@
         {
           "origin": "https://n"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "name": "my-journal",
     "slug": "my-journal"

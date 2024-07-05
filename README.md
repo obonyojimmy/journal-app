@@ -18,4 +18,4 @@ The backend is built in python using fastapi framework.
 
 1. On terminal and run `make prod_api` to start the api.
 
-2. 
+2. Open a separate terminal  and run `make app` to run the app in development mode.
