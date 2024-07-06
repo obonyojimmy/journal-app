@@ -1,8 +1,9 @@
+from uuid import UUID
 from typing import Type, TypeVar, Optional, Any, Generic, List, Union, Dict
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
-from .models import Base, User
+from .models import Base, User, Journal, Category
 from .utils import DatabaseSession, verify_password, hash_pass
 
 ModelType = TypeVar("ModelType", bound=Base)
@@ -91,3 +92,71 @@ class CrudUser(CRUDBase):
 		self.db.commit()
 		self.db.refresh(user)
 		return user
+
+class CrudCategory(CRUDBase):
+	model: Category = Category
+
+	def __init__(self):
+		""" Crud Category """
+		super().__init__(self.model)
+
+	def filter(self, name: str, user_id:str=None, limit: int = 0) -> Union[Category, List[Category]]:
+		db = self.db
+		model: Category = self.model
+		query = db.query(model)
+		query = query.filter(model.name == name)
+		if user_id:
+			query = query.filter(model.user_id == user_id)
+		if limit == 1:
+			return query.first()
+		if limit:
+			return query.limit(limit).all()
+		return query.all()
+	
+	def create(self, name:str, user_id:UUID) -> Category:
+		category = self.filter(name, user_id=user_id, limit=1)
+		if category:
+			return category
+		category = Category(name=name, user_id=user_id)
+		self.db.add(category)
+		self.db.commit()
+		self.db.refresh(category)
+		return category
+
+class CrudJournal(CRUDBase):
+	model: Journal = Journal
+
+	def __init__(self):
+		""" Crud Journal """
+		super().__init__(self.model)
+
+	def get(self, id:str, refresh:bool=False) -> Journal:
+		return super().get(id, refresh=refresh)
+	
+	def filter(self, user_id:str=None, id:str=None, title:str=None, limit:int = 0) -> Union[Journal, List[Journal]]:
+		db = self.db
+		model: Journal = self.model
+		query = db.query(model)
+		if id:
+			query = query.filter(model.id == id)
+		if user_id:
+			query = query.filter(model.user_id == user_id)
+		if title:
+			query = query.filter(model.title == title)
+		if limit == 1:
+			return query.first()
+		if limit:
+			return query.limit(limit).all()
+		return query.all()
+	
+	def create(self, user_id:UUID, title:str, content:str, category:str=None):
+		kwargs = {}
+		if category:
+			category = CrudCategory().create(category, user_id=user_id)
+			kwargs['category_id'] = category.id
+		journal = Journal(title=title, content=content, user_id=user_id, **kwargs)
+		self.db.add(journal)
+		self.db.commit()
+		self.db.refresh(journal)
+		return journal
+	

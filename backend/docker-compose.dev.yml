@@ -9,6 +9,7 @@ services:
       network: host
     volumes:
       - ./src:/app/src
+      - ./alembic:/app/alembic
     env_file:
       - .env
     environment:

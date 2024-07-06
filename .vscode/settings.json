@@ -1,0 +1,8 @@
+{
+    "files.exclude": {
+        "**/__pycache__": true
+    },
+    "editor.tabSize": 4,
+    "search.useIgnoreFiles": true,
+    "search.useParentIgnoreFiles": true
+}

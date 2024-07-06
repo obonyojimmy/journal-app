@@ -10,15 +10,6 @@ from src.utils import create_token
 
 router = APIRouter()
 
-@router.post("/register")
-async def register(
-    email: str = Form(..., description="registration email"),
-	password: Optional[str] = Form(..., description="registration password"),
-) -> User:
-    crud_user = CrudUser()
-    user = crud_user.register(email, password)
-    return user
-    
 @router.post("/token")
 async def token_login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -33,7 +24,7 @@ async def token_login(
         )
     access_token_expires = timedelta(minutes=config.jwt_token_expire)
     access_token = create_token(
-        data={"sub": user.id}, 
+        data={"sub": user.email}, 
         expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")

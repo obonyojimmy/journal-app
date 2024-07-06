@@ -1,4 +1,4 @@
-from uuid import UUID
+from uuid import UUID, uuid4
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime, timedelta, timezone
 from typing import Mapping, Any, Optional, List, Dict, Union
@@ -17,3 +17,18 @@ class Token(BaseModel):
 	access_token: str
 	token_type: str
 
+class Category(BaseModel):
+	model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+	id: Union[UUID, str]  = Field(description="category id", default_factory=uuid4 )
+	name: str = Field(..., description="category name")
+
+class JournalBase(BaseModel):
+	model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+	id: Union[UUID, str]  = Field(description="journal id", default_factory=uuid4 )
+	title: str = Field(None, description="journal title")
+	content: str = Field(None, description="journal summary")
+	created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+	updated_at: Optional[datetime] = Field(None, description="last update date")
+
+class Journal(JournalBase):
+	category: Optional[Category] = Field(None, description="the category")

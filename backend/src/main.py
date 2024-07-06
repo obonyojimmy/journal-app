@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
 from .routes.auth_router import router as auth_router
+from .routes.user_router import router as user_router
+from .routes.journal_router import router as journal_router
 
 app = FastAPI(
 	title='Journal api',
@@ -20,8 +22,10 @@ app.add_middleware(
 	allow_headers=["*"],
 )
 
-@app.get("/",)
+@app.get("/", include_in_schema=False)
 def main():
 	return RedirectResponse(url="/docs/")
 
-app.include_router(auth_router)
+app.include_router(auth_router,  tags=["auth"])
+app.include_router(user_router, tags=["users"])
+app.include_router(journal_router, tags=["journals"])
