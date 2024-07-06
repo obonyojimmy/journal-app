@@ -1,6 +1,7 @@
 import { Redirect, Stack } from 'expo-router';
 import { Text, View } from "react-native";
-import { useSession } from '../../ctx';
+import { useSession } from '../../ctx'
+import { JournalProvider } from '../../hooks/useJournals';
 
 export default function AppLayout() {
     const { session, isLoading } = useSession();
@@ -21,8 +22,10 @@ export default function AppLayout() {
     // This layout can be deferred because it's not the root layout.
     //return <Stack />;
     return (
-        <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <JournalProvider>
+            <Stack>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            </Stack>
+        </JournalProvider>
     )
 }

@@ -12,8 +12,7 @@ export default function Signin() {
     const handleLogin = async () => {
         try {
             console.log('email')
-            signIn()
-            //await signInWithEmailAndPassword(auth, email, password);
+            await signIn(email, password)
             router.replace('/');
         } catch (error) {
             Alert.alert('Error', error.message);
