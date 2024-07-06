@@ -4,18 +4,9 @@ import { Appbar, Avatar, List, FAB, Searchbar, Chip, Portal, Modal } from 'react
 import { useRouter } from 'expo-router';
 import { useSession } from '../../../ctx';
 import { useJournal } from '../../../hooks/useJournals';
-import {timeAgo} from '../../../utils'
+import { timeAgo } from '../../../utils'
+import JournalItem from '../../../components/JournalItem'
 
-const Item = ({ id, title, content, created_at }) => {
-    const category = title.slice(0, 3)
-    const date = timeAgo(created_at)
-    return <List.Item
-        title={title}
-        description={content}
-        left={props => <Avatar.Text size={40} label={category} />}
-        right={props => <View style={styles.right}><List.Icon {...props} icon="star-outline" /><List.Subheader>{date}</List.Subheader></View>}
-    />
-}
 
 export default function Dashboard() {
     const { signOut } = useSession();
@@ -47,7 +38,7 @@ export default function Dashboard() {
             <View className='p-1'>
                 <FlatList
                     data={journals}
-                    renderItem={({ item }) => <Item {...item} />}
+                    renderItem={({ item }) => <JournalItem {...item} />}
                     keyExtractor={item => item.id}
                 />
             </View>
@@ -87,4 +78,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
     },
+    listItem: {
+        borderBottomColor: 'grey',
+        borderBottomWidth: 1,
+    }
 });

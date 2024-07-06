@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStorageState } from './hooks/useStore';
-import { encodeFormData } from './utils'
+import { encodeFormData, saveStorageItem } from './utils'
+import { CallSignIn } from './api'
 
 const API_URL = "http://localhost:5000" //process.env.EXPO_PUBLIC_API_URL;
 
@@ -39,27 +40,19 @@ export function SessionProvider(props: React.PropsWithChildren) {
             value={{
                 signIn: async (username, password) => {
                     // Perform sign-in logic here
+
                     try {
-                        const formData = encodeFormData({ username, password })
-                        const response = await fetch(`${API_URL}/token`, {
-                            method: 'POST',
-                            body: formData,
-                        })
-                        if (response.ok) {
-                            // Handle successful login
-                            console.log('Login successful');
-                            const payload = await response.json();
-                            console.log(payload)
-                            const token = payload.access_token
-                            setSession(token);
-                        } else {
-                            // Handle login error
-                            console.log('Login failed');
+                        const payload = await CallSignIn(username, password)
+                        if (payload) {
+                            const access_token = payload.access_token
+                            const refresh_token = payload?.refresh_token
+                            await saveStorageItem('refresh_token', refresh_token)
+                            setSession(payload.access_token);
                         }
+
                     } catch (error) {
                         console.log('Login failed', error);
                     }
-
                 },
                 signOut: () => {
                     setSession(null);

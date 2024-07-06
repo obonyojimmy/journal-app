@@ -1,4 +1,4 @@
-.PHONY:  dev_api prod_api app_install app_start
+.PHONY:  dev_api prod_api app_install app
 
 dev_api:
 	cd backend && docker compose -f docker-compose.dev.yml up --build --remove-orphans

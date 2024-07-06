@@ -35,7 +35,7 @@ async def token_login(
     )
     return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
-@app.post("/refresh-token")
+@router.post("/refresh_token")
 async def refresh_access_token(refresh_token: str) -> Token:
     try:
         payload = jwt.decode(refresh_token, config.jwt_secret_key, algorithms=[config.jwt_algorithm])
