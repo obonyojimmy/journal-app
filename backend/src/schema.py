@@ -14,7 +14,8 @@ class User(BaseModel):
 	profile: Optional[UserProfile]  = Field(None, description="user profile")
 	
 class Token(BaseModel):
-	access_token: str
+	access_token: str = Field(None, description="access token")
+	refresh_token: Optional[str] = Field(None, description="refresh token")
 	token_type: str
 
 class Category(BaseModel):

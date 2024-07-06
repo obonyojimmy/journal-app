@@ -2,7 +2,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
-from typing import Generator, Tuple
+from typing import Generator, Tuple, Optional
 from passlib.context import CryptContext
 from fastapi import APIRouter, Form, Query, Header, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
@@ -25,13 +25,19 @@ def get_db() -> Generator:
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+credentials_exception = HTTPException(
+	status_code=401,
+	detail="Could not validate credentials",
+	headers={"WWW-Authenticate": "Bearer"},
+)
+
 def hash_pass(password:str):
 	return pwd_context.hash(password)
 
 def verify_password(plain_password, hashed_password):
 	return pwd_context.verify(plain_password, hashed_password)
 
-def create_token(data:dict, expires_delta: timedelta | None = None):
+def create_token(data:dict, expires_delta: Optional[timedelta] = None):
 	#data = self.model_dump()
 	to_encode = data.copy()
 	if expires_delta:
@@ -42,12 +48,8 @@ def create_token(data:dict, expires_delta: timedelta | None = None):
 	encoded_jwt = jwt.encode(to_encode, config.jwt_secret_key, algorithm=config.jwt_algorithm)
 	return encoded_jwt
 
+
 async def validate_user(token: str = Depends(oauth2_scheme)) -> User:
-	credentials_exception = HTTPException(
-		status_code=401,
-		detail="Could not validate credentials",
-		headers={"WWW-Authenticate": "Bearer"},
-	)
 	try:
 		payload = jwt.decode(token, config.jwt_secret_key, algorithms=[config.jwt_algorithm])
 		email: str = payload.get("sub")

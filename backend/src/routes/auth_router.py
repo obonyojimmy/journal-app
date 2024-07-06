@@ -1,3 +1,4 @@
+import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Form, Query, Header, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -23,8 +24,38 @@ async def token_login(
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=config.jwt_token_expire)
+    refresh_token_expires = timedelta(days=config.jwt_refresh_token_days)
     access_token = create_token(
         data={"sub": user.email}, 
         expires_delta=access_token_expires
     )
-    return Token(access_token=access_token, token_type="bearer")
+    refresh_token = create_token(
+        data={"sub": user.email}, 
+        expires_delta=refresh_token_expires
+    )
+    return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
+
+@app.post("/refresh-token")
+async def refresh_access_token(refresh_token: str) -> Token:
+    try:
+        payload = jwt.decode(refresh_token, config.jwt_secret_key, algorithms=[config.jwt_algorithm])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    crud_user = CrudUser()
+    user = crud_user.filter(email, limit=1)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    access_token_expires = timedelta(minutes=config.jwt_token_expire)
+    refresh_token_expires = timedelta(days=config.jwt_refresh_token_days)
+    access_token = create_token(
+        data={"sub": user.email}, 
+        expires_delta=access_token_expires
+    )
+    refresh_token = create_token(
+        data={"sub": user.email}, 
+        expires_delta=refresh_token_expires
+    )
+    return Token(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
