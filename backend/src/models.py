@@ -14,7 +14,7 @@ class User(Base):
 	email = Column(String, nullable=False, index=True)
 	hash_password = Column(String, nullable=False)
 	profile = Column(JSON, nullable=True, default={})
-	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.now(tz=timezone.utc))
+	created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 	updated_at = Column(DateTime(timezone=True), nullable=True)
 	## relationships
 	journals = relationship("Journal", back_populates="user")
@@ -36,7 +36,7 @@ class Journal(Base):
 	content = Column(String)
 	user_id = Column(UUID(as_uuid=True), ForeignKey("user.id"), nullable=False)
 	category_id = Column(UUID(as_uuid=True), ForeignKey("category.id"), nullable=True)
-	created_at = Column(DateTime(timezone=True), nullable=False, default=datetime.now(tz=timezone.utc))
+	created_at = Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
 	updated_at = Column(DateTime(timezone=True), nullable=True)
 	## relationships
 	user = relationship("User", back_populates="journals")

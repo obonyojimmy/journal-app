@@ -5,6 +5,7 @@ import { Appbar, Avatar, List, FAB, Searchbar, Chip, Portal, IconButton, Text, B
 import { View, TextInput, Alert, Pressable, StyleSheet } from 'react-native';
 //import MultiSelect from 'react-native-multiple-select';
 import { getJournal } from '../../api'
+import { useJournal } from '../../hooks/useJournals';
 
 export interface JournalSearchParams {
     id: string;
@@ -16,17 +17,20 @@ export interface JournalSearchParams {
 export default function JournalScreen() {
     const params = useLocalSearchParams();
     console.log(params)
+    const { updateJournal, deleteJournal } = useJournal()
     //const {id, title, date, category} = params
     const [actionsVisible, setActionsVisible] = useState(false);
     const [title, setTitle] = useState(params?.title);
     const [category, setCategory] = useState(params?.category);
     const [content, setContent] = useState('');
+    const [editMode, setEditMode] = useState(false);
+    const [textHeight, setTextHeight] = useState(35);
     const date = params.date //'2 hours ago'
 
     useEffect(() => {
         if (params?.id) {
             getJournal(params.id)
-                .then(d => { 
+                .then(d => {
                     console.log(d)
                     setContent(d.content)
                 })
@@ -36,15 +40,16 @@ export default function JournalScreen() {
         }
 
     }, [params?.id])
-    const handleSave = async () => {
-        try {
-            console.log('email')
-            //await signInWithEmailAndPassword(auth, email, password);
-            router.replace('/');
-        } catch (error) {
-            Alert.alert('Error', error.message);
-        }
+
+    const handleSaveChanges = async () => {
+        await updateJournal(params.id, content)
+        setEditMode(false)
     };
+
+    const handleDelete = async () => {
+        await deleteJournal(params.id)
+        router.replace('/');
+    }
 
 
     return (
@@ -69,8 +74,8 @@ export default function JournalScreen() {
                             anchor={<Appbar.Action icon="chevron-down" onPress={() => { setActionsVisible(true) }} />}
                             anchorPosition='top'
                         >
-                            <Menu.Item onPress={() => { }} title="Edit" />
-                            <Menu.Item onPress={() => { }} title="Delete" />
+                            <Menu.Item onPress={() => setEditMode(true)} title="Edit" />
+                            <Menu.Item onPress={() => { handleDelete() }} title="Delete" />
                         </Menu>
                     )
 
@@ -78,9 +83,36 @@ export default function JournalScreen() {
             />
 
             <View className="p-2">
-                <Text>
-                    {content}
-                </Text>
+                {
+                    editMode ?
+                        <TextInput
+                            className="flex border p-2  m-2 w-full h-full rounded"
+                            style={{
+                                flex: 1,
+                                //alignSelf: "flex-end",
+                                height: textHeight,
+                                maxHeight: 200
+                            }}
+                            placeholder="content"
+                            value={content}
+                            onChangeText={(e) => {
+                                setContent(e);
+                                setTextHeight(35 + (e.split('\n').length - 1) * 20);
+                            }}
+                            //onChangeText={setContent}
+                            multiline
+                        /> : <Text>{content}</Text>
+                }
+                <View className="pt-4">
+                    {
+                        editMode &&
+                        <View className="pt-4">
+                            <Button onPress={handleSaveChanges}>Save changes</Button>
+                            <Button onPress={()=> setEditMode(false)}>Cancel</Button>
+                        </View>
+                    }
+                </View>
+
             </View>
 
         </View>

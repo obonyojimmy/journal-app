@@ -42,6 +42,7 @@ export default function Dashboard() {
             </Appbar.Header>
             <Appbar.Header>
                 <View style={styles.chipContainer} className="gap-2">
+                    <Chip onPress={() => console.log('Pressed')}>All</Chip>
                     {
                         categories.map(cat => {
                             return <Chip key={cat.id} onPress={() => console.log('Pressed')}>{cat.name}</Chip>

@@ -151,6 +151,57 @@ export async function getJournal(id: string): Promise<Journal> {
     return payload as Journal;
 }
 
+export async function CallUpdateJournal(id:string, content: string): Promise<Journal> {
+    const formData = encodeFormData({ content })
+    const session = await getStorageItem('session')
+    const headers = {
+        'Authorization': `Bearer ${session}`,
+    }
+    let response = await fetch(`${API_URL}/journal/${id}`, {
+        method: 'PUT',
+        headers,
+        body: formData,
+        mode: 'cors',
+    })
+    if (response.status === 401) {
+        const tokenPayload = await CallRefreshToken();
+        headers.Authorization = `Bearer ${tokenPayload.access_token}`;
+        response = await fetch(`${API_URL}/journal/${id}`, {
+            method: 'PUT',
+            headers,
+            body: formData,
+            mode: 'cors',
+        })
+    }
+    if (!response.ok) return null
+    const payload = await response.json();
+    return payload as Journal;
+}
+
+export async function CallDeleteJournal(id:string): Promise<string> {
+    const session = await getStorageItem('session')
+    const headers = {
+        'Authorization': `Bearer ${session}`,
+    }
+    let response = await fetch(`${API_URL}/journal/${id}`, {
+        method: 'DELETE',
+        headers,
+        mode: 'cors',
+    })
+    if (response.status === 401) {
+        const tokenPayload = await CallRefreshToken();
+        headers.Authorization = `Bearer ${tokenPayload.access_token}`;
+        response = await fetch(`${API_URL}/journal/${id}`, {
+            method: 'DELETE',
+            headers,
+            mode: 'cors',
+        })
+    }
+    if (!response.ok) return null
+    const payload = await response.text();
+    return payload
+}
+
 export async function fetchCategories(): Promise<Array<Category>> {
     const session = await getStorageItem('session')
     const headers = {

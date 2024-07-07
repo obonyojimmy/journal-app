@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import datetime, timezone
 from typing import Type, TypeVar, Optional, Any, Generic, List, Union, Dict
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
@@ -160,4 +161,22 @@ class CrudJournal(CRUDBase):
 		self.db.commit()
 		self.db.refresh(journal)
 		return journal
+	
+	def update(self, id:UUID, content:str):
+		journal = self.get(id)
+		if not journal:
+			raise Exception('journal not found')
+		journal.content = content
+		self.db.add(journal)
+		self.db.commit()
+		self.db.refresh(journal)
+		return journal
+	
+	def delete(self, id:UUID):
+		journal = self.get(id)
+		if not journal:
+			raise Exception('journal not found')
+		self.db.delete(journal)
+		self.db.commit()
+		return id
 	

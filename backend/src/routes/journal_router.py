@@ -45,4 +45,35 @@ async def get_journal(
             detail="journal not found",
         )
     return Journal.model_validate(journal)
+
+@router.put("/journal/{id}")
+async def update_journal(
+    id: UUID = Path(..., description="the journal id"),
+    content: str = Form(..., description="contnet to update"),
+    valid_user: User = Depends(validate_user)
+) -> Journal:
+    crud_journal = CrudJournal()
+    journal = crud_journal.filter(user_id=valid_user.id, id=id, limit=1)
+    if not journal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="journal not found",
+        )
+    journal =  crud_journal.update(journal.id, content=content)
+    return Journal.model_validate(journal)
+
+@router.delete("/journal/{id}")
+async def update_journal(
+    id: UUID = Path(..., description="the journal id"),
+    valid_user: User = Depends(validate_user)
+) -> str:
+    crud_journal = CrudJournal()
+    journal = crud_journal.filter(user_id=valid_user.id, id=id, limit=1)
+    if not journal:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="journal not found",
+        )
+    delete_id =  crud_journal.delete(journal.id)
+    return str(delete_id)
     

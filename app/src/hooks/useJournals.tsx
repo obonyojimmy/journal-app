@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useStorageState } from './useStore'
 import { useSession } from '../ctx'
-import { fetchJournals, fetchCategories, createJournal, Journal, Category } from '../api';
+import { fetchJournals, fetchCategories, createJournal, CallUpdateJournal, CallDeleteJournal, Journal, Category } from '../api';
 import { saveStorageItem } from '../utils'
 
 const JournalContext = React.createContext<{
@@ -10,12 +10,16 @@ const JournalContext = React.createContext<{
     categories?: Array<Category> | null;
     isLoading: boolean;
     addJournal: (title: string, content: string, category: string) => Promise<Journal>;
+    updateJournal: (id: string, content: string) => Promise<Journal>;
+    deleteJournal: (id: string) => Promise<string>;
 }>({
     //fetchJournal: () => null,
     journals: [],
     categories: [],
     isLoading: false,
     addJournal: () => null,
+    updateJournal: () => null,
+    deleteJournal: () => null,
 });
 
 export function useJournal() {
@@ -73,6 +77,16 @@ export function JournalProvider(props: React.PropsWithChildren) {
                     
                     return journal
                 },
+                updateJournal: async (id: string, content: string) => {
+                    const journal = await CallUpdateJournal(id, content)
+                    return journal
+                },
+                deleteJournal: async (id: string) => {
+                    const payload = await CallDeleteJournal(id)
+                    const _journals = journals.filter(d=> d.id !== id)
+                    setJournals(_journals)
+                    return payload
+                }
             }}
         >
             {props.children}
