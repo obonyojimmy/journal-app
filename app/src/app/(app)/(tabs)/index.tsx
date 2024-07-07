@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { Appbar, Avatar, List, FAB, Searchbar, Chip, Portal, Menu } from 'react-native-paper';
 import { useRouter } from 'expo-router';
@@ -7,12 +7,13 @@ import { useJournal } from '../../../hooks/useJournals';
 import { timeAgo } from '../../../utils'
 import JournalItem from '../../../components/JournalItem'
 
-
 export default function Dashboard() {
-    const { signOut } = useSession();
-    const { journals } = useJournal()
-    const [filterVisible, setFilterVisible] = React.useState(false);
     const router = useRouter();
+    const { signOut } = useSession();
+    const { journals, categories } = useJournal()
+    const [filterVisible, setFilterVisible] = useState(false);
+
+
 
     const handleOpenFilterMenu = () => {
         setFilterVisible(true)
@@ -29,7 +30,7 @@ export default function Dashboard() {
                 <Appbar.Action icon="refresh" onPress={handleReload} />
                 <Menu
                     visible={filterVisible}
-                    onDismiss={()=> {setFilterVisible(false)}}
+                    onDismiss={() => { setFilterVisible(false) }}
                     anchor={<Appbar.Action icon="filter" onPress={handleOpenFilterMenu} />}
                     anchorPosition='bottom'
                 >
@@ -37,13 +38,15 @@ export default function Dashboard() {
                     <Menu.Item onPress={() => { }} title="This week" />
                     <Menu.Item onPress={() => { }} title="This month" />
                 </Menu>
-                
+
             </Appbar.Header>
             <Appbar.Header>
                 <View style={styles.chipContainer} className="gap-2">
-                    <Chip onPress={() => console.log('Pressed')}>Info</Chip>
-                    <Chip onPress={() => console.log('Pressed')}>Starred</Chip>
-                    <Chip onPress={() => console.log('Pressed')}>Emails</Chip>
+                    {
+                        categories.map(cat => {
+                            return <Chip onPress={() => console.log('Pressed')}>{cat.name}</Chip>
+                        })
+                    }
                 </View>
             </Appbar.Header>
 

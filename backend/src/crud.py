@@ -100,11 +100,12 @@ class CrudCategory(CRUDBase):
 		""" Crud Category """
 		super().__init__(self.model)
 
-	def filter(self, name: str, user_id:str=None, limit: int = 0) -> Union[Category, List[Category]]:
+	def filter(self, name:str=None, user_id:str=None, limit: int = 0) -> Union[Category, List[Category]]:
 		db = self.db
 		model: Category = self.model
 		query = db.query(model)
-		query = query.filter(model.name == name)
+		if name:
+			query = query.filter(model.name == name)
 		if user_id:
 			query = query.filter(model.user_id == user_id)
 		if limit == 1:

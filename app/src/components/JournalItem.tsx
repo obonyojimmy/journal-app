@@ -5,11 +5,12 @@ import { Avatar, List, } from 'react-native-paper';
 import { timeAgo } from '../utils'
 import {Journal} from '../api'
 
-export default function JournalItem({ id, title, content, created_at }: Journal) {
-    const category = title.slice(0, 3)
+export default function JournalItem({ id, title, content, created_at, category }: Journal) {
+    const categoryTag = category?.name ? category.name.slice(0, 3) : ''
+
     const date = timeAgo(created_at)
     const handleOnPress = () => {
-        router.navigate({ pathname: 'journal', params: { id, title, date, category } })
+        router.navigate({ pathname: 'journal', params: { id, title, date, category: category?.name } })
     }
     return (
         <List.Item
@@ -17,7 +18,7 @@ export default function JournalItem({ id, title, content, created_at }: Journal)
             description={content}
             style={styles.listItem}
             onPress={handleOnPress}
-            left={props => <Avatar.Text size={40} label={category} />}
+            left={props => <Avatar.Text size={40} label={categoryTag} />}
             right={props => <View style={styles.right}><List.Icon {...props} icon="star-outline" /><List.Subheader>{date}</List.Subheader></View>}
         />
     )

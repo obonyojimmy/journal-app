@@ -4,6 +4,7 @@ from starlette.responses import RedirectResponse
 from .routes.auth_router import router as auth_router
 from .routes.user_router import router as user_router
 from .routes.journal_router import router as journal_router
+from .routes.category_router import router as category_router
 
 app = FastAPI(
 	title='Journal api',
@@ -29,3 +30,4 @@ def main():
 app.include_router(auth_router,  tags=["auth"])
 app.include_router(user_router, tags=["users"])
 app.include_router(journal_router, tags=["journals"])
+app.include_router(category_router, tags=["categories"])

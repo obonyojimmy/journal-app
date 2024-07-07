@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useStorageState } from './useStore'
 import { useSession } from '../ctx'
-import { fetchJournals, Journal } from '../api';
-import {saveStorageItem} from '../utils'
+import { fetchJournals, fetchCategories, Journal, Category } from '../api';
+import { saveStorageItem } from '../utils'
 const JournalContext = React.createContext<{
     //fetchJournal: () => null;
     journals?: Array<Journal> | null;
+    categories?: Array<Category> | null;
     isLoading: boolean;
 }>({
     //fetchJournal: () => null,
@@ -26,16 +27,29 @@ export function useJournal() {
 
 export function JournalProvider(props: React.PropsWithChildren) {
     const [journals, setJournals] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [[cacheLoading, cache], setCache] = useStorageState('journals');
 
-    
+
     React.useEffect(() => {
+        fetchCategories()
+            .then(d => {
+                setCategories(d)
+            })
+            .catch(() => { })
+        
         fetchJournals()
             .then(payload => {
                 setJournals(payload)
             })
-            .catch(() => { })
+            .catch(() => {
+
+            })
+            .finally(() => {
+                setIsLoading(false)
+            })
+
     }, [])
 
     return (
@@ -43,6 +57,7 @@ export function JournalProvider(props: React.PropsWithChildren) {
             value={{
                 journals,
                 isLoading,
+                categories
             }
             }>
             {props.children}
