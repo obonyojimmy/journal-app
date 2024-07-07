@@ -45,12 +45,13 @@ export async function CallSignIn(username: string, password: string): Promise<To
 export async function CallRefreshToken(): Promise<Token> {
     const refreshToken = await getStorageItem('refresh_token')
     console.log('refreshToken', refreshToken)
-    const response = await fetch(`${API_URL}/refresh_token`, {
+    const queryParams = encodeURIComponent(refreshToken)
+    const response = await fetch(`${API_URL}/refresh_token?refresh_token=${queryParams}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ refresh_token: refreshToken }),
+        //body: JSON.stringify({ refresh_token: refreshToken }),
     })
     if (!response.ok) {
         await saveStorageItem('refresh_token', null)
@@ -77,7 +78,6 @@ export async function CallRegister(email: string, password: string, name: string
 
 export async function fetchJournals(): Promise<Array<Journal>> {
     const session = await getStorageItem('session')
-    console.log('session', session)
     const headers = {
         'Authorization': `Bearer ${session}`,
     }
@@ -96,4 +96,26 @@ export async function fetchJournals(): Promise<Array<Journal>> {
     if (!response.ok) return []
     const payload = await response.json();
     return payload as Array<Journal>;
+}
+
+export async function getJournal(id: string): Promise<Journal> {
+    const session = await getStorageItem('session')
+    const headers = {
+        'Authorization': `Bearer ${session}`,
+    }
+    let response = await fetch(`${API_URL}/journal/${id}`, {
+        method: 'GET',
+        headers
+    })
+    if (response.status === 401) {
+        const tokenPayload = await CallRefreshToken();
+        headers.Authorization = `Bearer ${tokenPayload.access_token}`;
+        response = await fetch(`${API_URL}/journal/${id}`, {
+            method: 'GET',
+            headers
+        })
+    }
+    if (!response.ok) return null
+    const payload = await response.json();
+    return payload as Journal;
 }

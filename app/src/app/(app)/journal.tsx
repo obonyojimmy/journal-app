@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
-import { Appbar, Avatar, List, FAB, Searchbar, Chip, Portal, Modal, Text, Button } from 'react-native-paper';
-import {  View, TextInput, Alert, Pressable, StyleSheet } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Appbar, Avatar, List, FAB, Searchbar, Chip, Portal, IconButton, Text, Button, Menu } from 'react-native-paper';
+import { View, TextInput, Alert, Pressable, StyleSheet } from 'react-native';
 //import MultiSelect from 'react-native-multiple-select';
+import { getJournal } from '../../api'
+
+export interface JournalSearchParams {
+    id: string;
+    title: string;
+    date?: string;
+    category?: string;
+}
 
 export default function JournalScreen() {
     const params = useLocalSearchParams();
     console.log(params)
-    const [title, setTitle] = useState('');
+    //const {id, title, date, category} = params
+    const [actionsVisible, setActionsVisible] = useState(false);
+    const [title, setTitle] = useState(params?.title);
+    const [category, setCategory] = useState(params?.category);
     const [content, setContent] = useState('');
-    const date = '2 hours ago'
+    const date = params.date //'2 hours ago'
+
+    useEffect(() => {
+        if (params?.id) {
+            getJournal(params.id)
+                .then(d => { 
+                    console.log(d)
+                    setContent(d.content)
+                })
+                .catch(() => {
+
+                })
+        }
+
+    }, [params?.id])
     const handleSave = async () => {
         try {
             console.log('email')
@@ -28,38 +54,35 @@ export default function JournalScreen() {
                     headerTitle: () => (
                         <View style={styles.right}>
                             <Text variant='headlineSmall'>{params.title}</Text>
-                            <Text variant='labelSmall'>{date}</Text>
+                            <View className='flex-auto flex-row space-x-2 items-center'>
+                                <Text variant='labelSmall'>{date}</Text>
+                                <Chip onPress={() => console.log('Pressed')} className='p-2' textStyle={styles.chipText}>{category}</Chip>
+                            </View>
+
                         </View>
                     ),
-                    headerRight: () => <View style={styles.chipContainer}><Chip onPress={() => console.log('Pressed')}>Info</Chip></View>
+                    //headerRight: () => <FontAwesome  name="ellipsis-v"   onPress={()=> {}} />
+                    headerRight: () => (
+                        <Menu
+                            visible={actionsVisible}
+                            onDismiss={() => { setActionsVisible(false) }}
+                            anchor={<Appbar.Action icon="chevron-down" onPress={() => { setActionsVisible(true) }} />}
+                            anchorPosition='top'
+                        >
+                            <Menu.Item onPress={() => { }} title="Edit" />
+                            <Menu.Item onPress={() => { }} title="Delete" />
+                        </Menu>
+                    )
 
                 }}
             />
 
-            <View className="px-4 md:px-6 flex flex-col items-center gap-4 text-center">
-                <View className="gap-4 w-full">
-                    <TextInput
-                        className="flex border p-2 m-2 w-full rounded"
-                        placeholder="title"
-                        value={title}
-                        onChangeText={setTitle}
-                    />
-                    <TextInput
-                        className="flex border p-2 m-2 w-full rounded"
-                        placeholder="content"
-                        value={content}
-                        onChangeText={setContent}
-                        multiline
-                    />
-
-
-                    <Button
-                        onPress={handleSave}
-                    >
-                        Save
-                    </Button>
-                </View>
+            <View className="p-2">
+                <Text>
+                    {content}
+                </Text>
             </View>
+
         </View>
     );
 }
@@ -85,4 +108,8 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         padding: 1
     },
+    chipText: {
+        lineHeight: 10,
+        marginHorizontal: 2
+    }
 });

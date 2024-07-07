@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
-import { Appbar, Avatar, List, FAB, Searchbar, Chip, Portal, Modal } from 'react-native-paper';
+import { Appbar, Avatar, List, FAB, Searchbar, Chip, Portal, Menu } from 'react-native-paper';
 import { useRouter } from 'expo-router';
 import { useSession } from '../../../ctx';
 import { useJournal } from '../../../hooks/useJournals';
@@ -11,11 +11,12 @@ import JournalItem from '../../../components/JournalItem'
 export default function Dashboard() {
     const { signOut } = useSession();
     const { journals } = useJournal()
-    const [modalVisible, setModalVisible] = React.useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const [filterVisible, setFilterVisible] = React.useState(false);
     const router = useRouter();
 
-    const onChangeSearch = query => setSearchQuery(query);
+    const handleOpenFilterMenu = () => {
+        setFilterVisible(true)
+    }
 
     const handleReload = () => {
         signOut()
@@ -25,8 +26,18 @@ export default function Dashboard() {
         <>
             <Appbar.Header>
                 <Appbar.Content title="Journals" />
-                {/* <Appbar.Action icon="magnify" onPress={() => { }} /> */}
                 <Appbar.Action icon="refresh" onPress={handleReload} />
+                <Menu
+                    visible={filterVisible}
+                    onDismiss={()=> {setFilterVisible(false)}}
+                    anchor={<Appbar.Action icon="filter" onPress={handleOpenFilterMenu} />}
+                    anchorPosition='bottom'
+                >
+                    <Menu.Item onPress={() => { }} title="Today" />
+                    <Menu.Item onPress={() => { }} title="This week" />
+                    <Menu.Item onPress={() => { }} title="This month" />
+                </Menu>
+                
             </Appbar.Header>
             <Appbar.Header>
                 <View style={styles.chipContainer} className="gap-2">
@@ -35,6 +46,7 @@ export default function Dashboard() {
                     <Chip onPress={() => console.log('Pressed')}>Emails</Chip>
                 </View>
             </Appbar.Header>
+
             <View className='p-1'>
                 <FlatList
                     data={journals}
