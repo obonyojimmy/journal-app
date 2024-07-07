@@ -82,6 +82,31 @@ export async function CallRegister(email: string, password: string, name: string
     return payload as User
 }
 
+export async function createJournal(title:string, content: string, category: string = ''): Promise<Journal> {
+    const formData = encodeFormData({ title, content, category })
+    const session = await getStorageItem('session')
+    const headers = {
+        'Authorization': `Bearer ${session}`,
+    }
+    let response = await fetch(`${API_URL}/journal`, {
+        method: 'POST',
+        headers,
+        body: formData,
+    })
+    if (response.status === 401) {
+        const tokenPayload = await CallRefreshToken();
+        headers.Authorization = `Bearer ${tokenPayload.access_token}`;
+        response = await fetch(`${API_URL}/journal`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        })
+    }
+    if (!response.ok) return null
+    const payload = await response.json();
+    return payload as Journal;
+}
+
 export async function fetchJournals(): Promise<Array<Journal>> {
     const session = await getStorageItem('session')
     const headers = {

@@ -2,19 +2,25 @@ import React, { useState } from 'react';
 import { router, Stack } from 'expo-router';
 import { Text, View, TextInput, Alert, Pressable } from 'react-native';
 //import MultiSelect from 'react-native-multiple-select';
+import { createJournal } from '../../api'
+import { useJournal } from '../../hooks/useJournals';
 
-export default function CreateJournal() {
+export default function NewJournal() {
+    const { addJournal } = useJournal()
+    const [textHeight,setTextHeight] = useState(35);
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+    const [category, setCategory] = useState('');
 
     const handleSave = async () => {
-        try {
-            console.log('email')
-            //await signInWithEmailAndPassword(auth, email, password);
-            router.replace('/');
-        } catch (error) {
-            Alert.alert('Error', error.message);
-        }
+        addJournal(title, content, category)
+            .then(d => {
+                console.log(d)
+                router.replace('/');
+            })
+            .catch(() => {
+
+            })
     };
 
 
@@ -26,7 +32,7 @@ export default function CreateJournal() {
 
                 }}
             />
-            <View className="px-4 md:px-6 flex flex-col items-center gap-4 text-center">
+            <View className="px-4 gap-4 text-center">
                 <View className="gap-4 w-full">
                     <TextInput
                         className="flex border p-2 m-2 w-full rounded"
@@ -35,11 +41,28 @@ export default function CreateJournal() {
                         onChangeText={setTitle}
                     />
                     <TextInput
-                        className="flex border p-2 m-2 w-full rounded"
+                        className="flex border p-2  m-2 w-full rounded"
+                        style={{
+                            flex: 1,
+                            //alignSelf: "flex-end",
+                            height:textHeight,
+                            maxHeight:200
+                        }}
                         placeholder="content"
                         value={content}
-                        onChangeText={setContent}
+                        onChangeText={(e)=>{
+                            setContent(e);
+                            setTextHeight(35 + (e.split('\n').length-1) * 20);
+                         }}
+                        //onChangeText={setContent}
                         multiline
+                    />
+
+                    <TextInput
+                        className="flex border p-2 m-2 w-full rounded"
+                        placeholder="category"
+                        value={category}
+                        onChangeText={setCategory}
                     />
 
 

@@ -44,7 +44,7 @@ export default function Dashboard() {
                 <View style={styles.chipContainer} className="gap-2">
                     {
                         categories.map(cat => {
-                            return <Chip onPress={() => console.log('Pressed')}>{cat.name}</Chip>
+                            return <Chip key={cat.id} onPress={() => console.log('Pressed')}>{cat.name}</Chip>
                         })
                     }
                 </View>
@@ -53,7 +53,7 @@ export default function Dashboard() {
             <View className='p-1'>
                 <FlatList
                     data={journals}
-                    renderItem={({ item }) => <JournalItem {...item} />}
+                    renderItem={({ item }) => <JournalItem key={item.id} {...item} />}
                     keyExtractor={item => item.id}
                 />
             </View>
