@@ -4,6 +4,7 @@ from typing import Type, TypeVar, Optional, Any, Generic, List, Union, Dict
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from fastapi.encoders import jsonable_encoder
+from dateutil import parser
 from .models import Base, User, Journal, Category
 from .utils import DatabaseSession, verify_password, hash_pass
 
@@ -135,7 +136,7 @@ class CrudJournal(CRUDBase):
 	def get(self, id:str, refresh:bool=False) -> Journal:
 		return super().get(id, refresh=refresh)
 	
-	def filter(self, user_id:str=None, id:str=None, title:str=None, limit:int = 0) -> Union[Journal, List[Journal]]:
+	def filter(self, user_id:str=None, id:str=None, title:str=None, category_id:str=None, from_date:str=None, to_date:str=None, limit:int = 0) -> Union[Journal, List[Journal]]:
 		db = self.db
 		model: Journal = self.model
 		query = db.query(model)
@@ -145,6 +146,14 @@ class CrudJournal(CRUDBase):
 			query = query.filter(model.user_id == user_id)
 		if title:
 			query = query.filter(model.title == title)
+		if category_id:
+			query = query.filter(model.category_id == category_id)
+		if from_date:
+			from_date_dt = parser.isoparse(from_date)
+			query = query.filter(model.created_at >= from_date_dt)
+		if to_date:
+			to_date_dt = parser.isoparse(to_date)
+			query = query.filter(model.created_at <= to_date_dt)
 		if limit == 1:
 			return query.first()
 		if limit:

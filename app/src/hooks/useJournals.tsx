@@ -12,6 +12,7 @@ const JournalContext = React.createContext<{
     addJournal: (title: string, content: string, category: string) => Promise<Journal>;
     updateJournal: (id: string, content: string) => Promise<Journal>;
     deleteJournal: (id: string) => Promise<string>;
+    filterJournals: (category_id: string | null, date_tag: string | null) => Promise<Array<Journal>>;
 }>({
     //fetchJournal: () => null,
     journals: [],
@@ -20,6 +21,7 @@ const JournalContext = React.createContext<{
     addJournal: () => null,
     updateJournal: () => null,
     deleteJournal: () => null,
+    filterJournals: () => null,
 });
 
 export function useJournal() {
@@ -85,6 +87,12 @@ export function JournalProvider(props: React.PropsWithChildren) {
                     const payload = await CallDeleteJournal(id)
                     const _journals = journals.filter(d=> d.id !== id)
                     setJournals(_journals)
+                    return payload
+                },
+                filterJournals: async (category_id: string | null=null, date_tag: string | null=null) => {
+                    const payload = await fetchJournals(category_id, date_tag)
+                    //const _journals = journals.filter(d=> d.id !== id)
+                    setJournals(payload)
                     return payload
                 }
             }}

@@ -1,4 +1,4 @@
-import { encodeFormData, getStorageItem, saveStorageItem } from "./utils";
+import { encodeFormData, getStorageItem, saveStorageItem, searchParams, getDateFromLabel } from "./utils";
 
 interface Token {
     access_token: string;
@@ -107,19 +107,37 @@ export async function createJournal(title:string, content: string, category: str
     return payload as Journal;
 }
 
-export async function fetchJournals(): Promise<Array<Journal>> {
+export async function fetchJournals(category_id:string|null=null, date_tag:string|null=null): Promise<Array<Journal>> {
     const session = await getStorageItem('session')
+    let queryFilters = ""
+    if (category_id || date_tag) {
+        //queryFilters = "?"
+        const params = {}
+        if (category_id) {
+            params['category_id'] = category_id
+        }
+        if (date_tag) {
+            console.log(getDateFromLabel(date_tag))
+            const {from_date, to_date} = getDateFromLabel(date_tag)
+            params['from_date'] = from_date
+            params['to_date'] = to_date
+        }
+        queryFilters = `?${searchParams(params)}`
+    }
+    //if (category_id) queryFilters = `${queryFilters}category_id=${category_id}`
+    //if (from_date) queryFilters = `${queryFilters}category_id=${category_id}`
+    
     const headers = {
         'Authorization': `Bearer ${session}`,
     }
-    let response = await fetch(`${API_URL}/journal`, {
+    let response = await fetch(`${API_URL}/journal${queryFilters}`, {
         method: 'GET',
         headers
     })
     if (response.status === 401) {
         const tokenPayload = await CallRefreshToken();
         headers.Authorization = `Bearer ${tokenPayload.access_token}`;
-        response = await fetch(`${API_URL}/journal`, {
+        response = await fetch(`${API_URL}/journal${queryFilters}`, {
             method: 'GET',
             headers
         })

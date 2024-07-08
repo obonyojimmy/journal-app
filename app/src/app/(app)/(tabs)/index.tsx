@@ -10,8 +10,10 @@ import JournalItem from '../../../components/JournalItem'
 export default function Dashboard() {
     const router = useRouter();
     const { signOut } = useSession();
-    const { journals, categories } = useJournal()
+    const { journals, categories, filterJournals } = useJournal()
     const [filterVisible, setFilterVisible] = useState(false);
+    const [categoryFilter, setcategoryFilter] = useState(null);
+    const [dateFilter, setdateFilter] = useState(null);
 
 
 
@@ -19,8 +21,30 @@ export default function Dashboard() {
         setFilterVisible(true)
     }
 
-    const handleReload = () => {
-        signOut()
+    const handleReload = async () => {
+        setcategoryFilter(null)
+        setdateFilter(null)
+        await filterJournals(null, null)
+    }
+
+    const handleCategoryFilter = async (category_id: string) => {
+        if (!category_id) {
+            setcategoryFilter(null)
+            await filterJournals(null, dateFilter)
+        } else {
+            setcategoryFilter(category_id)
+            await filterJournals(category_id, dateFilter)
+        }
+    }
+
+    const handleDateFilter = async (dateTag: string) => {
+        if (!dateTag) {
+            setdateFilter(null)
+            await filterJournals(categoryFilter, null)
+        } else {
+            setdateFilter(dateTag)
+            await filterJournals(categoryFilter, dateTag)
+        }
     }
 
     return (
@@ -34,18 +58,24 @@ export default function Dashboard() {
                     anchor={<Appbar.Action icon="filter" onPress={handleOpenFilterMenu} />}
                     anchorPosition='bottom'
                 >
-                    <Menu.Item onPress={() => { }} title="Today" />
-                    <Menu.Item onPress={() => { }} title="This week" />
-                    <Menu.Item onPress={() => { }} title="This month" />
+                    <Menu.Item onPress={() => handleDateFilter(null)} title="All" />
+                    <Menu.Item onPress={() => handleDateFilter('today')} title="Today" />
+                    <Menu.Item onPress={() => handleDateFilter('week')} title="This week" />
+                    <Menu.Item onPress={() => handleDateFilter('month')} title="This month" />
+                    <Menu.Item onPress={() => handleDateFilter('year')} title="This Year" />
                 </Menu>
 
             </Appbar.Header>
             <Appbar.Header>
                 <View style={styles.chipContainer} className="gap-2">
-                    <Chip onPress={() => console.log('Pressed')}>All</Chip>
+                    <Chip selected={!categoryFilter} onPress={() => handleCategoryFilter(null)}>All</Chip>
                     {
                         categories.map(cat => {
-                            return <Chip key={cat.id} onPress={() => console.log('Pressed')}>{cat.name}</Chip>
+                            return <Chip
+                                key={cat.id}
+                                selected={cat.id === categoryFilter}
+                                onPress={() => handleCategoryFilter(cat.id)}
+                            >{cat.name}</Chip>
                         })
                     }
                 </View>
