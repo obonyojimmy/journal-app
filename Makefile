@@ -9,5 +9,5 @@ prod_api:
 app_install:
 	cd app && npm install
 
-app:
+app: app_install
 	cd app && npx expo start
