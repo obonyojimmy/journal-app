@@ -1,53 +1,101 @@
 
-import React, { useState } from 'react';
-import { Text, View, TextInput, Alert, Pressable } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Stack } from 'expo-router';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { Text, View, Alert, Pressable } from 'react-native';
+import { TextInput, Button , Appbar} from 'react-native-paper';
+import { GetUser, UpdateUser } from '../../../api'
 
 export default function Settings() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [age, setAge] = useState(null);
+    const [password, setPassword] = useState(null);
+    const [editMode, setEditMode] = useState(false);
 
-    const handleSave = async () => {
-        try {
-            console.log('email')
-        } catch (error) {
-            Alert.alert('Error', error.message);
-        }
+    useEffect(() => {
+
+        GetUser()
+            .then(d => {
+                console.log(d)
+                setEmail(d?.email)
+                setName(d?.profile.name)
+                setAge(d?.profile.age)
+            })
+            .catch(() => {
+
+            })
+
+
+    }, [])
+
+    const handleSaveChanges = async () => {
+        const user = await UpdateUser(name, age, password)
+        setEditMode(false)
     };
 
 
     return (
-        <View className="px-4 md:px-6 flex flex-col items-center ">
+        <View>
+            <Stack.Screen
+                options={{
+                    headerRight: () => <FontAwesome className='px-2'  name="edit" size={20}   onPress={()=> setEditMode(true)} />
+                    /* headerRight: () => (
+                        <Appbar.Action icon="edit" onPress={() => { setEditMode(true) }} />
+                    ) */
+
+                }}
+            />
+            <View className="px-4 py-2">
             <View className="gap-4 w-full">
                 <TextInput
-                    className="flex border p-2 m-2 w-full rounded"
-                    placeholder="Names"
+                    //className="flex border p-2 m-2 w-full rounded"
+                    label="Names"
+                    //placeholder="Names"
                     value={name}
                     onChangeText={setName}
+                    disabled={!editMode}
                 />
                 <TextInput
-                    className="flex border p-2 m-2 w-full rounded"
-                    placeholder="Email"
+                    //className="flex border p-2 m-2 w-full rounded"
+                    label="Email"
+                    //placeholder="Email"
                     value={email}
-                    onChangeText={setEmail}
-                    
+                    //onChangeText={setEmail}
+                    disabled
+
                 />
                 <TextInput
-                    className="flex border p-2 m-2 w-full rounded"
-                    placeholder="Password"
+                    //className="flex border p-2 m-2 w-full rounded"
+                    label="Password"
+                    //placeholder="Password"
+                    //value={editMode ? password : '****'}
                     value={password}
                     onChangeText={setPassword}
-                    
+                    secureTextEntry
+                    disabled={!editMode}
                 />
+                <TextInput
+                    //className="flex border p-2 m-2 w-full rounded"
+                    label="Age"
+                    //placeholder="Age"
+                    value={age}
+                    onChangeText={setAge}
+                    disabled={!editMode}
 
-
-                <Pressable
-                    className="flex h-9 items-center justify-center overflow-hidden rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-gray-50 web:shadow ios:shadow transition-colors hover:bg-gray-900/90 active:bg-gray-400/90 web:focus-visible:outline-none web:focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-50/90 dark:focus-visible:ring-gray-300"
-                    onPress={handleSave}
-                >
-                    <Text className='text-sm font-medium text-gray-50'>Update settings</Text>
-                </Pressable>
+                />
+                <View className="pt-4">
+                    {
+                        editMode &&
+                        <View className="pt-4">
+                            <Button onPress={handleSaveChanges}>Save changes</Button>
+                            <Button onPress={() => setEditMode(false)}>Cancel</Button>
+                        </View>
+                    }
+                </View>
             </View>
         </View>
+        </View>
+        
     );
 }

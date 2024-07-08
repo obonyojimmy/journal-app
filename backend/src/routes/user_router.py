@@ -24,4 +24,16 @@ async def get_user(
     #id: UUID = Path(..., description="the user id")
 ) -> User:
     return valid_user
+
+@router.put("/user")
+async def get_user(
+    valid_user: User = Depends(validate_user),
+    name: Optional[str] = Form(None, description="update the user names"),
+    age: Optional[int] = Form(None, description="update the user ages"),
+    password: Optional[str] = Form(None, description="update the user password")
+) -> User:
+    """ update user """
+    crud_user = CrudUser()
+    user = crud_user.update(valid_user.id, name=name, age=age, password=password)
+    return user
     

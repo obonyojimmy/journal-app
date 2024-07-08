@@ -94,6 +94,25 @@ class CrudUser(CRUDBase):
 		self.db.commit()
 		self.db.refresh(user)
 		return user
+	
+	def update(self, id:UUID, name:str=None, age:int=None, password:str =None):
+		user = self.get(id)
+		if not user:
+			raise Exception('user not found')
+		user_profile = user.profile or {}
+		if name:
+			user_profile['name'] = name
+		if age:
+			user_profile['age'] = age
+		if name or age:
+			user.profile = user_profile
+		if password:
+			hashed_pass = hash_pass(password)
+			user.hash_password = hashed_pass
+		self.db.add(user)
+		self.db.commit()
+		self.db.refresh(user)
+		return user
 
 class CrudCategory(CRUDBase):
 	model: Category = Category

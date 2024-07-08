@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Stack, useLocalSearchParams, router } from 'expo-router';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Appbar, Avatar, List, FAB, Searchbar, Chip, Portal, IconButton, Text, Button, Menu } from 'react-native-paper';
 import { View, TextInput, Alert, Pressable, StyleSheet } from 'react-native';
 //import MultiSelect from 'react-native-multiple-select';
