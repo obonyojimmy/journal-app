@@ -17,6 +17,9 @@
       "expo-secure-store"
     ],
     "name": "my-journal",
-    "slug": "my-journal"
+    "slug": "my-journal",
+    "android": {
+      "package": "com.anonymous.myjournal"
+    }
   }
 }
